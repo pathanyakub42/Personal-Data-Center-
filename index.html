@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Hub & Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712;
+      --surface: rgba(17, 24, 39, 0.6);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-hover: rgba(31, 41, 55, 0.7);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.3);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Orbs */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.35;
+      animation: float 14s infinite alternate ease-in-out;
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #38bdf8, transparent 70%);
+      top: -100px;
+      left: 10%;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #8b5cf6, transparent 70%);
+      bottom: -150px;
+      right: 5%;
+      animation-duration: 18s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 60px) scale(1.1); }
+    }
+
+    /* Top Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-glow {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 14px var(--primary);
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Tab Switcher */
+    .tab-bar-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0 28px 0;
+    }
+
+    .tab-bar {
+      display: inline-flex;
+      background: rgba(17, 24, 39, 0.75);
+      border: 1px solid var(--surface-border);
+      border-radius: 30px;
+      padding: 4px;
+      backdrop-filter: blur(12px);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Main Content Container */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 18px 80px 18px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Search Bar */
+    .search-box {
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    /* Grids */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* Premium Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .badge-download { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-link { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-copy { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-note { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .card h3 {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 4px;
+    }
+
+    /* Note Card Spec */
+    .note-card {
+      cursor: pointer;
+      min-height: 150px;
+    }
+
+    .note-snippet {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      max-height: 72px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    /* Modern Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--surface-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    /* Floating Action Button (FAB) */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: white;
+      border: none;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+      z-index: 90;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fab:hover {
+      transform: scale(1.08) rotate(90deg);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Vault Styling */
+    .vault-card {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-bottom: 14px;
+    }
+
+    .vault-card pre {
+      white-space: pre-wrap;
+      font-size: 0.92rem;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px;
+      border-radius: 10px;
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 460px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-box.large {
+      max-width: 720px;
+    }
+
+    .modal-box label {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: -6px;
+    }
+
+    .modal-box input, .modal-box select, .modal-box textarea {
+      padding: 13px 16px;
+      background: rgba(3, 7, 18, 0.8);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .modal-box textarea {
+      height: 280px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .modal-box input:focus, .modal-box textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: dropDown 0.25s ease-out;
+    }
+
+    @keyframes dropDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Neon Orbs -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Header -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-glow"></div>
+      <h1>Nexus Hub</h1>
+    </div>
+    <div>
+      <button id="btn-admin-toggle" class="btn btn-secondary">
+        <span id="admin-icon">🔒</span> <span id="admin-status-text">Admin</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Segmented Tabs -->
+  <div class="tab-bar-wrap">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-btn-notes">📝 Notes</button>
+      <button class="tab-btn" id="tab-btn-hub">⚡ Hub Tools</button>
+      <button class="tab-btn admin-only hidden" id="tab-btn-vault">🛡️ Secret Vault</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Live Search -->
+    <div class="search-box">
+      <input type="text" id="live-search-input" class="search-input" placeholder="🔍 Search notes or tools...">
+    </div>
+
+    <!-- View: Notes -->
+    <div id="view-notes" class="view-panel">
+      <div class="grid" id="notes-grid"></div>
+    </div>
+
+    <!-- View: Hub Tools -->
+    <div id="view-hub" class="view-panel hidden">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <button id="btn-add-item" class="btn btn-primary admin-only hidden">+ Add Hub Item</button>
+      </div>
+      <div class="grid" id="items-grid"></div>
+    </div>
+
+    <!-- View: Admin Vault -->
+    <div id="view-vault" class="view-panel hidden">
+      <div id="archived-notes-list"></div>
+    </div>
+  </main>
+
+  <!-- Floating Add Note Button -->
+  <button id="btn-fab-note" class="fab" title="Make a Note">+</button>
+
+  <!-- Create Note Modal -->
+  <div id="modal-create-note" class="modal-backdrop hidden" style="display:none;">
+    <div class="modal-box">
+      <h3 style="font-size:1.2rem; font-weight:700;">Create Note</h3>
+      <label>Title</label>
+      <input type="text" id="new-note-title" placeholder="e.g. My Secret Project..." autocomplete="off">
+      <div class="modal-actions">
+        <button id="btn-cancel-create-note" class="btn btn-secondary">Cancel</button>
+        <button id="btn-confirm-create-note" class="btn btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Editor Modal -->
+  <div id="modal-editor" class="modal-backdrop hidden" style="display:none;">
+    <div class="modal-box large">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="editor-note-title" style="font-size:1.25rem; font-weight:700;">Note</h3>
+        <span id="editor-sync-status" style="font-size:0.8rem; color:var(--text-muted);">Synced</span>
+      </div>
+      <textarea id="editor-note-content" placeholder="Write anything here... It syncs in real-time."></textarea>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <span id="editor-word-count" style="font-size:0.82rem; color:var(--text-muted);">0 characters</span>
+        <div style="display:flex; gap:8px;">
+          <button id="btn-hide-vault-from-editor" class="btn btn-warning admin-only hidden">Hide to Vault</button>
+          <button id="btn-close-editor" class="btn btn-secondary">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin PIN Modal -->
+  <div id="modal-login" class="modal-backdrop hidden" style="display:none;">
+    <div class="modal-box">
+      <h3 style="font-size:1.2rem; font-weight:700;">Admin Authorization</h3>
+      <p style="font-size:0.88rem; color:var(--text-muted);">Enter PIN to manage items and view hidden notes.</p>
+      <input type="password" id="admin-pin-input" placeholder="Secret PIN" autocomplete="off">
+      <div class="modal-actions">
+        <button id="btn-cancel-login" class="btn btn-secondary">Cancel</button>
+        <button id="btn-submit-login" class="btn btn-primary">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Hub Item Modal -->
+  <div id="modal-item" class="modal-backdrop hidden" style="display:none;">
+    <div class="modal-box">
+      <h3 style="font-size:1.2rem; font-weight:700;">Add Hub Item</h3>
+      <form id="item-form" style="display:flex; flex-direction:column; gap:12px;">
+        <label>Title</label>
+        <input type="text" id="item-title" required placeholder="Item Title">
+
+        <label>Description</label>
+        <input type="text" id="item-desc" placeholder="Short description">
+
+        <label>Action Type</label>
+        <select id="item-type">
+          <option value="download">Direct Download Link</option>
+          <option value="link">Launch External URL</option>
+          <option value="copy">Copy Text to Clipboard</option>
+        </select>
+
+        <label>URL or Text to Copy</label>
+        <input type="text" id="item-payload" required placeholder="https://... or copyable text">
+
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-item" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, collection, doc, onSnapshot, updateDoc,
+      deleteDoc, addDoc, serverTimestamp, query, where 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCV-_69jhNroMx1IHlAPjC-mBrkdm8LkwI",
+      authDomain: "data-store-d9cf1.firebaseapp.com",
+      projectId: "data-store-d9cf1",
+      storageBucket: "data-store-d9cf1.firebasestorage.app",
+      messagingSenderId: "186500751345",
+      appId: "1:186500751345:web:dd60ac64864829a9fb6e50",
+      measurementId: "G-EKTWQZ0DX0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const ADMIN_SECRET_PIN = "7860";
+
+    const state = {
+      isAdmin: sessionStorage.getItem("isAdmin") === "true",
+      notes: [],
+      items: [],
+      searchQuery: "",
+      currentEditingNoteId: null,
+      debounceTimer: null,
+      currentTab: "notes"
+    };
+
+    // DOM Elements
+    const itemsGrid = document.getElementById("items-grid");
+    const notesGrid = document.getElementById("notes-grid");
+    const adminToggleBtn = document.getElementById("btn-admin-toggle");
+    const adminStatusText = document.getElementById("admin-status-text");
+    const adminIcon = document.getElementById("admin-icon");
+    const modalLogin = document.getElementById("modal-login");
+    const adminPinInput = document.getElementById("admin-pin-input");
+    const archivedNotesList = document.getElementById("archived-notes-list");
+
+    const liveSearchInput = document.getElementById("live-search-input");
+    const btnFabNote = document.getElementById("btn-fab-note");
+    const modalCreateNote = document.getElementById("modal-create-note");
+    const newNoteTitleInput = document.getElementById("new-note-title");
+    const btnCancelCreateNote = document.getElementById("btn-cancel-create-note");
+    const btnConfirmCreateNote = document.getElementById("btn-confirm-create-note");
+
+    const modalEditor = document.getElementById("modal-editor");
+    const editorNoteTitle = document.getElementById("editor-note-title");
+    const editorNoteContent = document.getElementById("editor-note-content");
+    const editorSyncStatus = document.getElementById("editor-sync-status");
+    const editorWordCount = document.getElementById("editor-word-count");
+    const btnCloseEditor = document.getElementById("btn-close-editor");
+    const btnHideVaultFromEditor = document.getElementById("btn-hide-vault-from-editor");
+
+    const modalItem = document.getElementById("modal-item");
+    const btnAddItem = document.getElementById("btn-add-item");
+    const btnCancelItem = document.getElementById("btn-cancel-item");
+    const itemForm = document.getElementById("item-form");
+
+    // Tabs DOM
+    const tabBtnNotes = document.getElementById("tab-btn-notes");
+    const tabBtnHub = document.getElementById("tab-btn-hub");
+    const tabBtnVault = document.getElementById("tab-btn-vault");
+    const viewNotes = document.getElementById("view-notes");
+    const viewHub = document.getElementById("view-hub");
+    const viewVault = document.getElementById("view-vault");
+
+    function switchTab(tab) {
+      state.currentTab = tab;
+      tabBtnNotes.classList.toggle("active", tab === "notes");
+      tabBtnHub.classList.toggle("active", tab === "hub");
+      tabBtnVault.classList.toggle("active", tab === "vault");
+
+      viewNotes.classList.toggle("hidden", tab !== "notes");
+      viewHub.classList.toggle("hidden", tab !== "hub");
+      viewVault.classList.toggle("hidden", tab !== "vault");
+
+      btnFabNote.classList.toggle("hidden", tab !== "notes");
+    }
+
+    tabBtnNotes.addEventListener("click", () => switchTab("notes"));
+    tabBtnHub.addEventListener("click", () => switchTab("hub"));
+    tabBtnVault.addEventListener("click", () => switchTab("vault"));
+
+    function showModal(el) {
+      el.classList.remove("hidden");
+      el.style.display = "flex";
+    }
+
+    function hideModal(el) {
+      el.classList.add("hidden");
+      el.style.display = "none";
+    }
+
+    function showToast(message) {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `<span style="color:#10b981; font-weight:bold;">✓</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    function updateAdminUI() {
+      document.querySelectorAll(".admin-only").forEach(el => {
+        el.classList.toggle("hidden", !state.isAdmin);
+      });
+      if (state.isAdmin) {
+        adminStatusText.innerText = "Exit";
+        adminIcon.innerText = "🔓";
+      } else {
+        adminStatusText.innerText = "Admin";
+        adminIcon.innerText = "🔒";
+        if (state.currentTab === "vault") switchTab("notes");
+      }
+      renderNotes();
+      renderItems();
+    }
+
+    adminToggleBtn.addEventListener("click", () => {
+      if (state.isAdmin) {
+        state.isAdmin = false;
+        sessionStorage.removeItem("isAdmin");
+        updateAdminUI();
+        showToast("Logged out of Admin mode");
+      } else {
+        showModal(modalLogin);
+        adminPinInput.value = "";
+        adminPinInput.focus();
+      }
+    });
+
+    document.getElementById("btn-cancel-login").addEventListener("click", () => hideModal(modalLogin));
+
+    document.getElementById("btn-submit-login").addEventListener("click", () => {
+      if (adminPinInput.value === ADMIN_SECRET_PIN) {
+        state.isAdmin = true;
+        sessionStorage.setItem("isAdmin", "true");
+        hideModal(modalLogin);
+        updateAdminUI();
+        showToast("Admin access unlocked");
+      } else {
+        showToast("Incorrect PIN");
+        adminPinInput.value = "";
+      }
+    });
+
+    // Notes Collection
+    const notesCol = collection(db, "all_notes");
+    const activeNotesQuery = query(notesCol, where("status", "==", "active"));
+
+    onSnapshot(activeNotesQuery, (snapshot) => {
+      state.notes = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderNotes();
+
+      if (state.currentEditingNoteId) {
+        const openNote = state.notes.find(n => n.id === state.currentEditingNoteId);
+        if (openNote && document.activeElement !== editorNoteContent) {
+          editorNoteContent.value = openNote.content || "";
+          updateCounts(editorNoteContent.value);
+        }
+      }
+    });
+
+    function renderNotes() {
+      notesGrid.innerHTML = "";
+      const q = state.searchQuery.toLowerCase();
+      const filtered = state.notes.filter(n => 
+        (n.title && n.title.toLowerCase().includes(q)) || 
+        (n.content && n.content.toLowerCase().includes(q))
+      );
+
+      if (filtered.length === 0) {
+        notesGrid.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">No notes found. Tap + to make one.</p>`;
+        return;
+      }
+
+      filtered.forEach(note => {
+        const card = document.createElement("div");
+        card.className = "card note-card";
+
+        const preview = note.content ? note.content.slice(0, 120) : "Empty note...";
+        const timeStr = note.updatedAt ? note.updatedAt.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : "Just now";
+
+        const adminButtons = state.isAdmin ? `
+          <button class="btn btn-warning btn-archive-card" data-id="${note.id}">Hide</button>
+          <button class="btn btn-danger btn-delete-card" data-id="${note.id}">Delete</button>
+        ` : "";
+
+        card.innerHTML = `
+          <div class="note-open-trigger" data-id="${note.id}">
+            <span class="card-badge badge-note">NOTE</span>
+            <h3>${note.title}</h3>
+            <div class="note-snippet" style="margin-top: 8px;">${preview}</div>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:0.78rem; color:var(--text-muted);">${timeStr}</span>
+            <div style="display:flex; gap:6px;">${adminButtons}</div>
+          </div>
+        `;
+        notesGrid.appendChild(card);
+      });
+
+      document.querySelectorAll(".note-open-trigger").forEach(el => {
+        el.addEventListener("click", () => {
+          openNoteEditor(el.getAttribute("data-id"));
+        });
+      });
+
+      document.querySelectorAll(".btn-archive-card").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          archiveNote(btn.getAttribute("data-id"));
+        });
+      });
+
+      document.querySelectorAll(".btn-delete-card").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (confirm("Delete this note permanently?")) {
+            await deleteDoc(doc(db, "all_notes", btn.getAttribute("data-id")));
+            showToast("Note deleted");
+          }
+        });
+      });
+    }
+
+    btnFabNote.addEventListener("click", () => {
+      newNoteTitleInput.value = "";
+      showModal(modalCreateNote);
+      newNoteTitleInput.focus();
+    });
+
+    btnCancelCreateNote.addEventListener("click", () => hideModal(modalCreateNote));
+
+    newNoteTitleInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnConfirmCreateNote.click();
+    });
+
+    // Make Note Action
+    btnConfirmCreateNote.addEventListener("click", async () => {
+      const title = newNoteTitleInput.value.trim();
+      if (!title) {
+        showToast("Please enter a note title");
+        return;
+      }
+
+      hideModal(modalCreateNote);
+      newNoteTitleInput.value = "";
+      showToast("Successfully created note");
+
+      if (state.currentTab !== "notes") switchTab("notes");
+
+      try {
+        await addDoc(notesCol, {
+          title: title,
+          content: "",
+          status: "active",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      } catch (err) {
+        showToast("Sync error: " + err.message);
+      }
+    });
+
+    function updateCounts(text) {
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      editorWordCount.innerText = `${chars} chars | ${words} words`;
+    }
+
+    function openNoteEditor(noteId) {
+      const note = state.notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      state.currentEditingNoteId = noteId;
+      editorNoteTitle.innerText = note.title;
+      editorNoteContent.value = note.content || "";
+      updateCounts(editorNoteContent.value);
+      editorSyncStatus.innerText = "Synced";
+      showModal(modalEditor);
+      editorNoteContent.focus();
+    }
+
+    editorNoteContent.addEventListener("input", () => {
+      updateCounts(editorNoteContent.value);
+      editorSyncStatus.innerText = "Saving...";
+      clearTimeout(state.debounceTimer);
+
+      state.debounceTimer = setTimeout(async () => {
+        if (!state.currentEditingNoteId) return;
+        try {
+          await updateDoc(doc(db, "all_notes", state.currentEditingNoteId), {
+            content: editorNoteContent.value,
+            updatedAt: serverTimestamp()
+          });
+          editorSyncStatus.innerText = "Saved";
+        } catch (err) {
+          editorSyncStatus.innerText = "Sync Error";
+        }
+      }, 500);
+    });
+
+    btnCloseEditor.addEventListener("click", () => {
+      hideModal(modalEditor);
+      state.currentEditingNoteId = null;
+    });
+
+    async function archiveNote(id) {
+      await updateDoc(doc(db, "all_notes", id), {
+        status: "archived",
+        archivedAt: serverTimestamp()
+      });
+
+      if (state.currentEditingNoteId === id) {
+        hideModal(modalEditor);
+        state.currentEditingNoteId = null;
+      }
+      showToast("Note hidden and moved to Vault!");
+    }
+
+    btnHideVaultFromEditor.addEventListener("click", () => {
+      if (state.currentEditingNoteId) archiveNote(state.currentEditingNoteId);
+    });
+
+    // Vault Query
+    const vaultQuery = query(notesCol, where("status", "==", "archived"));
+    onSnapshot(vaultQuery, (snapshot) => {
+      archivedNotesList.innerHTML = "";
+      if (snapshot.empty) {
+        archivedNotesList.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:40px 0;">Vault is empty.</p>`;
+        return;
+      }
+
+      snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const item = document.createElement("div");
+        item.className = "vault-card";
+        const dateStr = data.archivedAt ? data.archivedAt.toDate().toLocaleString() : "Recently";
+
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="font-size:1.1rem; font-weight:600;">${data.title}</h3>
+            <small style="color:var(--warning)">Archived: ${dateStr}</small>
+          </div>
+          <pre>${data.content || "(Empty)"}</pre>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-restore-vault" data-id="${docSnap.id}">Restore to Public</button>
+            <button class="btn btn-danger btn-delete-vault" data-id="${docSnap.id}">Delete Permanently</button>
+          </div>
+        `;
+        archivedNotesList.appendChild(item);
+      });
+
+      document.querySelectorAll(".btn-restore-vault").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          await updateDoc(doc(db, "all_notes", btn.getAttribute("data-id")), {
+            status: "active",
+            updatedAt: serverTimestamp()
+          });
+          showToast("Note restored to public list");
+        });
+      });
+
+      document.querySelectorAll(".btn-delete-vault").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (confirm("Permanently delete this note?")) {
+            await deleteDoc(doc(db, "all_notes", btn.getAttribute("data-id")));
+            showToast("Permanently deleted");
+          }
+        });
+      });
+    });
+
+    // Hub Items Collection
+    const itemsCol = collection(db, "hub_items");
+
+    onSnapshot(itemsCol, (snapshot) => {
+      state.items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderItems();
+    });
+
+    function renderItems() {
+      itemsGrid.innerHTML = "";
+      const q = state.searchQuery.toLowerCase();
+      const filtered = state.items.filter(i => 
+        (i.title && i.title.toLowerCase().includes(q)) || 
+        (i.description && i.description.toLowerCase().includes(q))
+      );
+
+      if (filtered.length === 0) {
+        itemsGrid.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:40px 0;">No hub tools available yet.</p>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        let badgeClass = "badge-link";
+        let badgeText = "URL";
+        let actionButtonHtml = "";
+
+        if (item.type === "download") {
+          badgeClass = "badge-download";
+          badgeText = "DOWNLOAD";
+          actionButtonHtml = `<a href="${item.payload}" download class="btn btn-primary">⬇ Download</a>`;
+        } else if (item.type === "link") {
+          badgeClass = "badge-link";
+          badgeText = "EXTERNAL";
+          actionButtonHtml = `<a href="${item.payload}" target="_blank" rel="noopener" class="btn btn-secondary">↗ Open URL</a>`;
+        } else if (item.type === "copy") {
+          badgeClass = "badge-copy";
+          badgeText = "CLIPBOARD";
+          actionButtonHtml = `<button class="btn btn-secondary btn-copy" data-text="${encodeURIComponent(item.payload)}">📋 Copy Text</button>`;
+        }
+
+        const adminControlsHtml = state.isAdmin ? `
+          <button class="btn btn-danger btn-delete-item" data-id="${item.id}">Delete</button>
+        ` : "";
+
+        card.innerHTML = `
+          <div>
+            <span class="card-badge ${badgeClass}">${badgeText}</span>
+            <h3>${item.title}</h3>
+            <p style="margin-top: 6px;">${item.description || ""}</p>
+          </div>
+          <div class="card-footer">
+            <div>${actionButtonHtml}</div>
+            <div>${adminControlsHtml}</div>
+          </div>
+        `;
+        itemsGrid.appendChild(card);
+      });
+
+      document.querySelectorAll(".btn-copy").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const text = decodeURIComponent(e.target.getAttribute("data-text"));
+          navigator.clipboard.writeText(text).then(() => {
+            showToast("Copied to clipboard!");
+          });
+        });
+      });
+
+      document.querySelectorAll(".btn-delete-item").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          if (confirm("Delete this item?")) {
+            await deleteDoc(doc(db, "hub_items", e.target.getAttribute("data-id")));
+            showToast("Item deleted");
+          }
+        });
+      });
+    }
+
+    btnAddItem.addEventListener("click", () => showModal(modalItem));
+    btnCancelItem.addEventListener("click", () => hideModal(modalItem));
+
+    itemForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await addDoc(itemsCol, {
+        title: document.getElementById("item-title").value,
+        description: document.getElementById("item-desc").value,
+        type: document.getElementById("item-type").value,
+        payload: document.getElementById("item-payload").value,
+        createdAt: serverTimestamp()
+      });
+      hideModal(modalItem);
+      itemForm.reset();
+      showToast("Item published");
+    });
+
+    liveSearchInput.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value;
+      renderNotes();
+      renderItems();
+    });
+
+    updateAdminUI();
+  </script>
+</body>
+</html>
